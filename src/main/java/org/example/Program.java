@@ -3,77 +3,63 @@ package org.example;
 import java.util.Scanner;
 
 public class Program {
-    int x,y,count,cost;
-    Monster[] mons;
-    int[][] map;
     public Program(){
+        int x,y,count,cost=0,tcost=0;
         Scanner scan = new Scanner(System.in);
         x = scan.nextInt();
         y = scan.nextInt();
-        cost = x*y;
-        map = new int[x][];
-        for (int i=0;i<x;i++){
-            map[i] = new int[y];
-        }
         count = scan.nextInt();
-        mons = new Monster[count];
-        for (int i=0;i<count;i++){
-            mons[i] = new Monster();
-            mons[i].x = scan.nextInt();
-            mons[i].y = scan.nextInt();
-            map[mons[i].x][mons[i].y] = 1;
+        if (count==1 || (x==1 && y==1)){
+            System.out.print(1);
         }
-        print();
-        int xl,xr,yb,yt;
-        for (Monster m : mons) {
-            xl=0;xr=0;yb=0;yt=0;
-            if (m.x==0) {
-                map[m.x+1][m.y] = 2;
-                xr = x+1;
+        else{
+            int[][] map = new int[x][y];
+            int xmin=x,ymin=y,xmax=0,ymax=0;
+            int tx,ty;
+            for (int i=0;i<count;i++){
+                tx = scan.nextInt()-1;
+                ty = scan.nextInt()-1;
+                map[tx][ty] = 1;
+                if (tx<xmin) xmin=tx;
+                if (tx>xmax) xmax=tx;
+                if (ty<ymin) ymin=ty;
+                if (ty>ymax) ymax=ty;
             }
-            else {
-                map[m.x-1][m.y] = 2;
-                xl = m.x-1;
+            if (xmax==0 && (map[0][1]!=1 || map[0][y-2]!=1)){
+                tcost = calculate(xmin,xmax,ymin+1,ymax);
+                if (tcost>cost) cost = tcost;
+                tcost = calculate(xmin,xmax,ymin,ymax-1);
+                if (tcost>cost) cost = tcost;
             }
-            if (m.x==x-1) map[m.x-1][m.y] = 2;
-            else map[m.x+1][m.y] = 2;
-            if (m.y==0) map[m.x][m.y+1] = 2;
-            else map[m.x][m.y-1] = 2;
-            if (m.y==y-1) map[m.x][m.y-1] = 2;
-            else map[m.x][m.y+1] = 2;
-            print();
-
-            map_setup();
-        }
-    }
-    private void print(){
-        for (int i=0;i<x;i++){
-            for (int j=0;j<y;j++){
-                System.out.printf("%d",map[i][j]);
+            if (ymax==0 && (map[1][0]!=1 || map[x-2][0]!=1)){
+                tcost = calculate(xmin+1,xmax,ymin,ymax);
+                if (tcost>cost) cost = tcost;
+                tcost = calculate(xmin,xmax-1,ymin,ymax);
+                if (tcost>cost) cost = tcost;
             }
-            System.out.printf("\n");
-        }
-        System.out.printf("----");
-    }
-    private boolean check(int x,int y){
-        for (var m:mons){
-            if (x==m.x && y==m.y) return true;
-        }
-        return false;
-    }
-    private int check_map(){
-
-    }
-    private void map_setup(){
-        for (int i=0;i<x;i++){
-            for (int j=0;j<y;j++){
-                if (check(i,j)){
-                    map[mons[i].x][mons[i].y] = 1;
+            if (cost == 0) {
+                cost = calculate(xmin,xmax,ymin,ymax);
+                if (xmin>0){
+                    tcost = calculate(xmin-1,xmax,ymin,ymax);
+                    if (tcost>cost) cost = tcost;
                 }
-                else{
-                    map[mons[i].x][mons[i].y] = 0;
+                if (xmax<x-1){
+                    tcost = calculate(xmin,xmax+1,ymin,ymax);
+                    if (tcost>cost) cost = tcost;
+                }
+                if (ymin>0){
+                    tcost = calculate(xmin,xmax,ymin-1,ymax);
+                    if (tcost>cost) cost = tcost;
+                }
+                if (ymax<y-1){
+                    tcost = calculate(xmin,xmax,ymin,ymax+1);
+                    if (tcost>cost) cost = tcost;
                 }
             }
+            System.out.print(cost);
         }
+    }
+    private int calculate(int x1,int x2,int y1,int y2){
+        return (x2 - x1 + 1) * (y2 - y1 + 1);
     }
 }
